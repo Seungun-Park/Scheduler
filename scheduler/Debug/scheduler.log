@@ -1,0 +1,8 @@
+﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(392,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (thread.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  inicontrol.cpp
+c:\users\pswsj\documents\visual studio 2015\projects\scheduler\scheduler\inicontrol.cpp(139): warning C4806: '|': 안전하지 않은 연산입니다. 'bool' 형식의 값('int' 형식으로 확장)이 주어진 상수와 같을 수 없습니다.
+c:\users\pswsj\documents\visual studio 2015\projects\scheduler\scheduler\inicontrol.cpp(139): warning C4554: '|': 연산자 우선 순위에 오류가 있는지 확인하십시오. 괄호를 사용하여 우선 순위를 명확하게 지정하십시오.
+c:\users\pswsj\documents\visual studio 2015\projects\scheduler\scheduler\inicontrol.cpp(213): warning C4806: '|': 안전하지 않은 연산입니다. 'bool' 형식의 값('int' 형식으로 확장)이 주어진 상수와 같을 수 없습니다.
+c:\users\pswsj\documents\visual studio 2015\projects\scheduler\scheduler\inicontrol.cpp(213): warning C4554: '|': 연산자 우선 순위에 오류가 있는지 확인하십시오. 괄호를 사용하여 우선 순위를 명확하게 지정하십시오.
+  scheduler.vcxproj -> C:\Users\pswsj\documents\visual studio 2015\Projects\scheduler\Debug\Scheduler.exe
+  scheduler.vcxproj -> C:\Users\pswsj\documents\visual studio 2015\Projects\scheduler\Debug\Scheduler.pdb (Full PDB)

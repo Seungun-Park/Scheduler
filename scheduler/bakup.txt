@@ -1,0 +1,134 @@
+#include <stdio.h>
+#include <Windows.h>
+#include "stdafx.h"
+#include <time.h>
+
+//전역변수 선언
+const char* day = "";
+const char* name = "";
+char daytemp[100] = "", nametemp[100] = "", inic[100] = "", temp[100] = "";
+int ini, tempi;
+
+bool finish = true; //스레드 종료변수
+
+//함수선언
+DWORD WINAPI work(LPVOID); //스레드 함수선언
+
+void read(); //읽는함수
+void write(); //쓰는함수
+void del(); //지우는함수
+
+int main(int argc, char* argv[]) {
+	DWORD dwID;
+	HANDLE h;
+	int msg, i, check;
+	h = CreateThread(NULL, 0, work, NULL, 0, &dwID); //스레드실행
+	check = 25;
+
+	time_t t;
+	struct tm ptm;
+	char today[30];
+
+	time(&t);
+	localtime_s(&ptm, &t);
+	strftime(today, sizeof(today), "%Y-%m-%d %a %H:%M:%S", &ptm);
+	printf("현재시각 : %s\n", today);
+
+	//프로그램 시작
+	
+	printf("스케쥴을 보고자 하는 날짜를 네자리 숫자로 입력해주세요. \n(예)12월 3일 -> 1203\n");
+	scanf_s("%d", &tempi);
+	sprintf_s(daytemp, "%d", tempi);
+	day = daytemp;
+		
+	read();
+
+	write();
+
+	del();
+		
+	Sleep(1000);
+
+	while (true) {
+		scanf_s("%d", &check);
+		if (check == 0) break;
+	}
+
+		finish = false;
+		WaitForSingleObject(h, INFINITE);
+
+		msg = MessageBox(NULL, "스레드가 종료되었습니다.", "스레드", MB_YESNO);
+
+		while (true) {
+			if (msg == IDYES) break;
+		}
+	Sleep(1000);
+	getchar();
+
+	return 0;
+}
+
+DWORD WINAPI work(LPVOID) {
+	while (finish) {
+		
+	}
+	return 0;
+}
+
+void read() { //읽는함수
+	for (int i = 1;; i++) {
+		sprintf_s(nametemp, "%d", i);
+		GetPrivateProfileString(day, nametemp, "Default", inic, sizeof(inic), "./schedule.ini");
+		ini = ::GetPrivateProfileInt(day, inic, 0000, "./schedule.ini");
+		if (inic[0] == 'D'&&inic[1] == 'e'&&inic[2] == 'f'&&inic[3] == 'a'&&inic[4] == 'u'&&inic[5] == 'l'&&inic[6] == 't') break;
+		printf("%d. %s %d시 %d분\n", i, inic, ini/100, ini%100);
+	}
+	while (getchar() != '\n');
+	printf("계속하려면 아무키나 입력하세요.");
+	getchar();
+	system("cls");
+	return;
+}
+
+void write() {
+	printf("추가할 스케쥴의 날짜를 입력하세요. : ");
+	fflush(stdin);
+	scanf_s("%d", &tempi);
+	sprintf_s(daytemp, "%d", tempi);
+	day = daytemp;
+	printf("추가할 스케쥴의 이름을 입력하세요. : ");
+	fflush(stdin);
+	scanf_s("%s", nametemp, sizeof(nametemp));
+	name = nametemp;
+	for (int i = 1;; i++) { //비어있는 슬롯 찾기
+		sprintf_s(temp, "%d", i);
+		GetPrivateProfileString(day, temp, "Default", inic, sizeof(inic), "./schedule.ini");
+		if (inic[0] == 'D'&&inic[1] == 'e'&&inic[2] == 'f'&&inic[3] == 'a'&&inic[4] == 'u'&&inic[5] == 'l'&&inic[6] == 't') break;
+	}
+	WritePrivateProfileString(day, temp, name, "./schedule.ini");
+	printf("성공적으로 등록되었습니다.\n");
+	Sleep(1000);
+	system("cls");
+	printf("\n[%d월 %d일의 스케쥴]\n", tempi / 100, tempi % 100);
+	read();
+	return;
+}
+
+void del() {
+	printf("삭제할 스케쥴의 날짜를 입력하세요. : ");
+	fflush(stdin);
+	scanf_s("%d", &tempi);
+	sprintf_s(daytemp, "%d", tempi);
+	day = daytemp;
+	printf("삭제할 스케쥴의 이름을 입력하세요. : ");
+	fflush(stdin);
+	scanf_s("%s", nametemp, sizeof(nametemp));
+	name = nametemp;
+	WritePrivateProfileString(day, temp, NULL, "./schedule.ini");
+	printf("성공적으로 삭제되었습니다.\n");
+	Sleep(1000);
+	system("cls");
+	printf("\n[%d월 %d일의 스케쥴]\n", tempi / 100, tempi % 100);
+	read();
+	return;
+}

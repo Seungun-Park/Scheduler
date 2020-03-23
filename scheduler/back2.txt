@@ -1,0 +1,525 @@
+#include "inicontrol.h"
+
+const char* day = "";
+const char* name = "";
+const char* timet = "";
+char daytemp[5] = "", nametemp[100] = "", temp[100] = "", timetemp[5] = "", inic[100]="";
+
+//월단위 데이터 변수 선언
+char janc[32][100][100] = { "" };
+int jani[32][100], janindex[32] = { 0 };
+char febc[32][100][100] = { "" };
+int febi[32][100], febindex[32] = { 0 };
+char marc[32][100][100] = { "" };
+int mari[32][100], marindex[32] = { 0 };
+char aprc[32][100][100] = { "" };
+int apri[32][100], aprindex[32] = { 0 };
+char mayc[32][100][100] = { "" };
+int mayi[32][100], mayindex[32] = { 0 };
+char junc[32][100][100] = { "" };
+int juni[32][100], junindex[32] = { 0 };
+char julc[32][100][100] = { "" };
+int juli[32][100], julindex[32] = { 0 };
+char augc[32][100][100] = { "" };
+int augi[32][100], augindex[32] = { 0 };
+char sepc[32][100][100] = { "" };
+int sepi[32][100], sepindex[32] = { 0 };
+char octc[32][100][100] = { "" };
+int octi[32][100], octindex[32] = { 0 };
+char novc[32][100][100] = { "" };
+int novi[32][100], novindex[32] = { 0 };
+char decc[32][100][100] = { "" };
+int deci[32][100], decindex[32] = { 0 };
+
+int ini, tempd, tempt;
+time_t controlt;
+struct tm controlptm;
+char controltoday[30];
+
+void control::clear() {
+	while (getchar() != '\n');
+	printf("\n...계속하려면 아무키나 입력하세요.");
+	getchar();
+	system("cls");
+}
+
+void control::controltime() {
+	time(&controlt);
+	localtime_s(&controlptm, &controlt);
+	strftime(controltoday, sizeof(controltoday), "%m%d", &controlptm);
+	day = controltoday;
+	printf("\n[%c%c월 %c%c일의 스케쥴]\n", controltoday[0], controltoday[1], controltoday[2], controltoday[3]);
+
+	for (int i = 1;; i++) {
+		sprintf_s(nametemp, "%d", i);
+		reset();
+		GetPrivateProfileString(day, nametemp, "Default", inic, sizeof(inic), "./schedule.ini");
+		ini = ::GetPrivateProfileInt(day, inic, 0000, "./schedule.ini");
+		if (inic[0] == 'D'&&inic[1] == 'e'&&inic[2] == 'f'&&inic[3] == 'a'&&inic[4] == 'u'&&inic[5] == 'l'&&inic[6] == 't') break;
+		printf("%d. %s | %d시 %d분\n", i, inic, ini / 100, ini % 100);
+	}
+
+	printf("\n...프로그램을 실행하려면 아무키나 입력하세요.");
+	getchar();
+	system("cls");
+	return;
+}
+
+void control::get() {
+	printf("\n스케쥴을 보고자 하는 날짜를 네자리 숫자로 입력하세요. \n(예)12월 3일 -> 1203\n입력 : ");
+	scanf_s("%d", &tempd);
+	sprintf_s(daytemp, "%d", tempd);
+	day = daytemp;
+	return;
+}
+
+void control::read() { //읽는함수
+	system("cls");
+	printf("\n[%d월 %d일의 스케쥴]\n", tempd / 100, tempd % 100);
+
+	for (int i = 1;; i++) {
+		sprintf_s(nametemp, "%d", i);
+		reset();
+		GetPrivateProfileString(day, nametemp, "Default", inic, sizeof(inic), "./schedule.ini");
+		ini = ::GetPrivateProfileInt(day, inic, 0000, "./schedule.ini");
+		if (inic[0] == 'D'&&inic[1] == 'e'&&inic[2] == 'f'&&inic[3] == 'a'&&inic[4] == 'u'&&inic[5] == 'l'&&inic[6] == 't') break;
+		printf("%d. %s | %d시 %d분\n", i, inic, ini / 100, ini % 100);
+	}
+
+	return;
+}
+
+
+void reset() {
+	memset(inic, NULL, sizeof(inic));
+}
+
+void control::write() {
+	//날짜 입력
+	printf("\n추가할 스케쥴의 날짜를 네자리 숫자로 입력하세요. \n(예)12월 3일 -> 1203.\n (취소는 0을 입력하세요)\n\n입력 : ");
+	fflush(stdin);
+	scanf_s("%d", &tempd);
+	if (tempd == 0) { //cancel
+		system("cls");
+		return;
+	}
+
+	//날짜를 달려서
+	if ((tempd / 100) < 1 || (tempd % 100) < 1 || (tempd / 100)>12) {
+		printf("\n유효한 날짜가 아닙니다.");
+		clear();
+		write();
+		return;
+	}
+	if ((((tempd % 100) > 30) && ((tempd / 100) == 4 | 6 | 9 | 11)) || (((tempd % 100) > 31) && ((tempd / 100) == 1 | 3 | 5 | 7 | 8 | 10 | 12)) || (((tempd % 100) > 29) && ((tempd / 100) == 2))) {
+		printf("\n유효한 날짜가 아닙니다.");
+		clear();
+		write();
+		return;
+	}
+
+	sprintf_s(daytemp, "%d", tempd);
+	day = daytemp;
+
+	//스케쥴 입력
+	system("cls");
+	read();
+	printf("\n추가할 스케쥴의 이름을 입력하세요.\n (취소는 'cancel'을 입력하세요)\n\n입력 : ");
+	fflush(stdin);
+	scanf_s("%s", nametemp, sizeof(nametemp));
+
+	if (nametemp[0] == 'c'&&nametemp[1] == 'a'&&nametemp[2] == 'n'&&nametemp[3] == 'c'&&nametemp[4] == 'e'&&nametemp[5] == 'l') {
+		system("cls");
+		return;
+	}//cancel
+
+	 //시간입력
+	printf("\n추가할 스케쥴의 시작시간을 네자리 숫자로 입력하세요. \n(예)오후 6시 40분 -> 1840\n\n 입력 : ");
+	fflush(stdin);
+	scanf_s("%d", &tempt);
+
+	//시간을 달려서
+	if (tempt<0 || (tempt / 100)>23 || (tempt % 100)>59) {
+		printf("\n유효한 시간이 아닙니다.");
+		clear();
+		write();
+		return;
+	}
+
+	name = nametemp;
+	sprintf_s(timetemp, "%d", tempt);
+	timet = timetemp;
+
+	for (int i = 1;; i++) { //비어있는 슬롯 찾기
+		sprintf_s(temp, "%d", i);
+		reset();
+		GetPrivateProfileString(day, temp, "Default", inic, sizeof(inic), "./schedule.ini");
+		if (inic[0] == 'D'&&inic[1] == 'e'&&inic[2] == 'f'&&inic[3] == 'a'&&inic[4] == 'u'&&inic[5] == 'l'&&inic[6] == 't') break;
+	}
+	WritePrivateProfileString(day, temp, name, "./schedule.ini");
+	WritePrivateProfileString(day, name, timet, "./schedule.ini");
+	printf("성공적으로 등록되었습니다.\n");
+
+	Sleep(1000);
+	read();
+	clear();
+	return;
+}
+
+void control::del() {
+	printf("\n삭제할 스케쥴의 날짜를 입력하세요.\n (취소는 0을 입력하세요)\n\n입력 : ");
+	fflush(stdin);
+	scanf_s("%d", &tempd);
+
+	if (tempd == 0) { //cancel
+		system("cls");
+		return;
+	}
+
+	//날짜를 달려서
+	if ((tempd / 100) < 1 || (tempd % 100) < 1 || (tempd / 100)>12) {
+		printf("\n유효한 날짜가 아닙니다.");
+		clear();
+		write();
+		return;
+	}
+	if ((((tempd % 100) > 30) && ((tempd / 100) == 4 | 6 | 9 | 11)) || (((tempd % 100) > 31) && ((tempd / 100) == 1 | 3 | 5 | 7 | 8 | 10 | 12)) || (((tempd % 100) > 29) && ((tempd / 100) == 2))) {
+		printf("\n유효한 날짜가 아닙니다.");
+		clear();
+		write();
+		return;
+	}
+
+	sprintf_s(daytemp, "%d", tempd);
+	day = daytemp;
+
+	system("cls");
+	read();
+	printf("삭제할 스케쥴의 이름을 입력하세요.\n (취소는 'cancel'을 입력하세요)\n\n입력 : ");
+	fflush(stdin);
+	scanf_s("%s", nametemp, sizeof(nametemp));
+
+	if (nametemp[0] == 'c'&&nametemp[1] == 'a'&&nametemp[2] == 'n'&&nametemp[3] == 'c'&&nametemp[4] == 'e'&&nametemp[5] == 'l') {
+		system("cls");
+		return;
+	}//cancel
+
+	name = nametemp;
+	WritePrivateProfileString(day, name, NULL, "./schedule.ini");
+	printf("\n...성공적으로 삭제되었습니다.\n");
+
+	Sleep(1000);
+	system("cls");
+	printf("\n[%d월 %d일의 스케쥴]\n", tempd / 100, tempd % 100);
+	read();
+	clear();
+	return;
+}
+
+int load(int j) {
+	sprintf_s(nametemp, "%d", j);
+	reset();
+	GetPrivateProfileString(day, nametemp, "Default", inic, sizeof(inic), "./schedule.ini");
+	ini = ::GetPrivateProfileInt(day, inic, 0000, "./schedule.ini");
+	if (inic == "Default") return 1;
+	return 2;
+}
+
+void control::all() {
+	int ijk;
+	for (int i = 1; i <= 31; i++) {//1월
+		ini = i + 100;
+		sprintf_s(daytemp, "%d", ini);
+		day = daytemp;
+		for (int j = 1;; j++) {
+			reset();
+			ijk = load(j);
+			if (ijk == 1) break;
+			for (int k = 0; inic[k] != '\n'; k++) {
+				janc[i][j][k] = inic[k];
+			}
+			janindex[i]++;
+			jani[i][j] = ini;
+		}
+	}
+	for (int i = 1; i <= 29; i++) {//2월
+		ini = i + 200;
+		sprintf_s(daytemp, "%d", ini);
+		day = daytemp;
+		for (int j = 1;; j++) {
+			reset();
+			ijk = load(j);
+			if (ijk == 1) break;
+			for (int k = 0; inic[k] != '\n'; k++) {
+				febc[i][j][k] = inic[k];
+			}
+			febindex[i]++;
+			febi[i][j] = ini;
+		}
+	}
+	for (int i = 1; i <= 31; i++) {//3월
+		ini = i + 300;
+		sprintf_s(daytemp, "%d", ini);
+		day = daytemp;
+		for (int j = 1;; j++) {
+			reset();
+			ijk = load(j);
+			if (ijk == 1) break;
+			for (int k = 0; inic[k] != '\n'; k++) {
+				marc[i][j][k] = inic[k];
+			}
+			marindex[i]++;
+			mari[i][j] = ini;
+		}
+	}
+	for (int i = 1; i <= 30; i++) {
+		ini = i + 400;
+		sprintf_s(daytemp, "%d", ini);
+		day = daytemp;
+		for (int j = 1;; j++) {
+			reset();
+			ijk = load(j);
+			if (ijk == 1) break;
+			for (int k = 0; inic[k] != '\n'; k++) {
+				aprc[i][j][k] = inic[k];
+			}
+			aprindex[i]++;
+			apri[i][j] = ini;
+		}
+	}
+	for (int i = 1; i <= 31; i++) {
+		ini = i + 500;
+		sprintf_s(daytemp, "%d", ini);
+		day = daytemp;
+		for (int j = 1;; j++) {
+			reset();
+			ijk = load(j);
+			if (ijk == 1) break;
+			for (int k = 0; inic[k] != '\n'; k++) {
+				mayc[i][j][k] = inic[k];
+			}
+			mayindex[i]++;
+			mayi[i][j] = ini;
+		}
+	}
+	for (int i = 1; i <= 30; i++) {
+		ini = i + 600;
+		sprintf_s(daytemp, "%d", ini);
+		day = daytemp;
+		for (int j = 1;; j++) {
+			reset();
+			ijk = load(j);
+			if (ijk == 1) break;
+			for (int k = 0; inic[k] != '\n'; k++) {
+				junc[i][j][k] = inic[k];
+			}
+			junindex[i]++;
+			juni[i][j] = ini;
+		}
+	}
+	for (int i = 1; i <= 31; i++) {
+		ini = i + 700;
+		sprintf_s(daytemp, "%d", ini);
+		day = daytemp;
+		for (int j = 1;; j++) {
+			reset();
+			ijk = load(j);
+			if (ijk == 1) break;
+			for (int k = 0; inic[k] != '\n'; k++) {
+				julc[i][j][k] = inic[k];
+			}
+			julindex[i]++;
+			juli[i][j] = ini;
+		}
+	}
+	for (int i = 1; i <= 31; i++) {
+		ini = i + 800;
+		sprintf_s(daytemp, "%d", ini);
+		day = daytemp;
+		for (int j = 1;; j++) {
+			reset();
+			ijk = load(j);
+			if (ijk == 1) break;
+			for (int k = 0; inic[k] != '\n'; k++) {
+				augc[i][j][k] = inic[k];
+			}
+			augindex[i]++;
+			augi[i][j] = ini;
+		}
+	}
+	for (int i = 1; i <= 30; i++) {
+		ini = i + 900;
+		sprintf_s(daytemp, "%d", ini);
+		day = daytemp;
+		for (int j = 1;; j++) {
+			reset();
+			ijk = load(j);
+			if (ijk == 1) break;
+			for (int k = 0; inic[k] != '\n'; k++) {
+				sepc[i][j][k] = inic[k];
+			}
+			sepindex[i]++;
+			sepi[i][j] = ini;
+		}
+	}
+	for (int i = 1; i <= 31; i++) {
+		ini = i + 1000;
+		sprintf_s(daytemp, "%d", ini);
+		day = daytemp;
+		for (int j = 1;; j++) {
+			reset();
+			ijk = load(j);
+			if (ijk == 1) break;
+			for (int k = 0; inic[k] != '\n'; k++) {
+				octc[i][j][k] = inic[k];
+			}
+			octindex[i]++;
+			octi[i][j] = ini;
+		}
+	}
+	for (int i = 1; i <= 30; i++) {
+		ini = i + 1100;
+		sprintf_s(daytemp, "%d", ini);
+		day = daytemp;
+		for (int j = 1;; j++) {
+			reset();
+			ijk = load(j);
+			if (ijk == 1) break;
+			for (int k = 0; inic[k] != '\n'; k++) {
+				novc[i][j][k] = inic[k];
+			}
+			novindex[i]++;
+			novi[i][j] = ini;
+		}
+	}
+	for (int i = 1; i <= 31; i++) {
+		ini = i + 1200;
+		sprintf_s(daytemp, "%d", ini);
+		day = daytemp;
+		for (int j = 1;; j++) {
+			ijk = load(j);
+			if (ijk == 1) break;
+			for (int k = 0; inic[k] != '\n'; k++) {
+				decc[i][j][k] = inic[k];
+			}
+			decindex[i]++;
+			deci[i][j] = ini;
+		}
+	}
+}
+
+void control::allprint(int mon) {
+	switch (mon) {
+	case 1:
+		for (int i = 1; i <= 31; i++) {
+			if (janindex[i]) {
+				printf("\n[1월 %d일의 스케쥴]\n", i);
+				for (int j = 1; j <= janindex[i]; j++) {
+					printf("%d. %s | %d시 %d분\n", i, janc[i][j], jani[i][j] / 100, jani[i][j] % 100);
+				}
+			}
+		}break;
+	case 2:
+		for (int i = 1; i <= 31; i++) {
+			if (febindex[i]) {
+				printf("\n[2월 %d일의 스케쥴]\n", i);
+				for (int j = 1; j <= febindex[i]; j++) {
+					printf("%d. %s | %d시 %d분\n", i, febc[i][j], febi[i][j] / 100, febi[i][j] % 100);
+				}
+			}
+		}break;
+	case 3:
+		for (int i = 1; i <= 31; i++) {
+			if (marindex[i]) {
+				printf("\n[3월 %d일의 스케쥴]\n", i);
+				for (int j = 1; j <= marindex[i]; j++) {
+					printf("%d. %s | %d시 %d분\n", i, marc[i][j], mari[i][j] / 100, mari[i][j] % 100);
+				}
+			}
+		}break;
+	case 4:
+		for (int i = 1; i <= 31; i++) {
+			if (aprindex[i]) {
+				printf("\n[4월 %d일의 스케쥴]\n", i);
+				for (int j = 1; j <= aprindex[i]; j++) {
+					printf("%d. %s | %d시 %d분\n", i, aprc[i][j], apri[i][j] / 100, apri[i][j] % 100);
+				}
+			}
+		}break;
+	case 5:
+		for (int i = 1; i <= 31; i++) {
+			if (mayindex[i]) {
+				printf("\n[5월 %d일의 스케쥴]\n", i);
+				for (int j = 1; j <= mayindex[i]; j++) {
+					printf("%d. %s | %d시 %d분\n", i, mayc[i][j], mayi[i][j] / 100, mayi[i][j] % 100);
+				}
+			}
+		}break;
+	case 6:
+		for (int i = 1; i <= 31; i++) {
+			if (junindex[i]) {
+				printf("\n[6월 %d일의 스케쥴]\n", i);
+				for (int j = 1; j <= junindex[i]; j++) {
+					printf("%d. %s | %d시 %d분\n", i, junc[i][j], juni[i][j] / 100, juni[i][j] % 100);
+				}
+			}
+		}break;
+	case 7:
+		for (int i = 1; i <= 31; i++) {
+			if (julindex[i]) {
+				printf("\n[7월 %d일의 스케쥴]\n", i);
+				for (int j = 1; j <= julindex[i]; j++) {
+					printf("%d. %s | %d시 %d분\n", i, julc[i][j], juli[i][j] / 100, juli[i][j] % 100);
+				}
+			}
+		}break;
+	case 8:
+		for (int i = 1; i <= 31; i++) {
+			if (augindex[i]) {
+				printf("\n[8월 %d일의 스케쥴]\n", i);
+				for (int j = 1; j <= augindex[i]; j++) {
+					printf("%d. %s | %d시 %d분\n", i, augc[i][j], augi[i][j] / 100, augi[i][j] % 100);
+				}
+			}
+		}break;
+	case 9:
+		for (int i = 1; i <= 31; i++) {
+			if (sepindex[i]) {
+				printf("\n[9월 %d일의 스케쥴]\n", i);
+				for (int j = 1; j <= sepindex[i]; j++) {
+					printf("%d. %s | %d시 %d분\n", i, sepc[i][j], sepi[i][j] / 100, sepi[i][j] % 100);
+				}
+			}
+		}break;
+	case 10:
+		for (int i = 1; i <= 31; i++) {
+			if (octindex[i]) {
+				printf("\n[10월 %d일의 스케쥴]\n", i);
+				for (int j = 1; j <= octindex[i]; j++) {
+					printf("%d. %s | %d시 %d분\n", i, octc[i][j], octi[i][j] / 100, octi[i][j] % 100);
+				}
+			}
+		}break;
+	case 11:
+		for (int i = 1; i <= 31; i++) {
+			if (novindex[i]) {
+				printf("\n[11월 %d일의 스케쥴]\n", i);
+				for (int j = 1; j <= novindex[i]; j++) {
+					printf("%d. %s | %d시 %d분\n", i, novc[i][j], novi[i][j] / 100, novi[i][j] % 100);
+				}
+			}
+		}break;
+	case 12:
+		for (int i = 1; i <= 31; i++) {
+			if (decindex[i]) {
+				printf("\n[12월 %d일의 스케쥴]\n", i);
+				for (int j = 1; j <= decindex[i]; j++) {
+					printf("%d. %s | %d시 %d분\n", i, decc[i][j], deci[i][j] / 100, deci[i][j] % 100);
+				}
+			}
+		}break;
+	}
+
+	clear();
+	return;
+}
